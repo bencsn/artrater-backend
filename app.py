@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 
 app = Flask(__name__)
 
@@ -11,24 +11,13 @@ def hello_world():
 @app.route("/start")
 def start_experiment():
     """ 
-    This will create an experiment in the database and return an experiment ID
+    This will 
+    1) create a document in the 'experiments' db collection.
+    2) call a function to generate trials. 
+    3) add the trials to the 'trials' subcollection under the 'experiment' collection.
+    4) return experimentID.
     """ 
-
-
-@app.route('/trialgen')
-def trialgen():
-    """ 
-    This will return one trial containing 4 items.
-    Requires users to submit an experiment ID.
-    Requires users to submit a trial number as a query string, starting from t = 1 (e.g. ?t=1).
-    """
-    t = request.args.get('t')
-    id = request.args.get('id')
-    if (t==None or t.strip()==""):
-        abort(422, "A trial number t is required and must be provided as a query string")
-    if (id==None or id.strip()==""):
-        abort(422, "An experiment ID id is required and must be provided as a query string")
-    return 'I am a trial generator! :D: ---> ' + str(t)
+    return jsonify({"message":"I create an experiment and add it to the database and return the experiment ID"})
 
 
 if __name__ == "__main__":
