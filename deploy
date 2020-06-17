@@ -1,0 +1,2 @@
+gcloud builds submit --tag gcr.io/thelettersproject/vgrating
+gcloud run deploy --image gcr.io/thelettersproject/vgrating --platform managed

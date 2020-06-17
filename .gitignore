@@ -1,3 +1,4 @@
-rainbow
-env
-.vscode
+rainbow/
+env/
+.vscode/
+__pycache__/
