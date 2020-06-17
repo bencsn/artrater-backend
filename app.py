@@ -35,7 +35,6 @@ def get_experiment_by_id():
         abort(422, "Missing experiment ID (eid)")
     e = Experiment()
     e.set_existing_experiment_from_id(eid)
-    e.fetch_types()
     return jsonify({"experimentID":e.get_experiment_id(),"info":e.get_experiment_info(),"trials":e.get_full_trials()})
 
 

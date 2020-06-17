@@ -23,6 +23,7 @@ class Experiment:
 
     def set_existing_experiment(self, experiment_doc_ref):
         self.experiment_doc_ref = experiment_doc_ref
+        self.__fetch_types()
         experiment = self.get_experiment_info()
         if (experiment):
             self.age = experiment["age"]
@@ -71,17 +72,17 @@ class Experiment:
                     {'name': type["name"], "best_question": type["best"], "worst_question": type["worst"], "options":options_with_images})
         return full_trials
 
-    def prepare(self):
-        self.fetch_types()
-        self.fetch_prev_experiments()
-        self.fetch_trials()
+    def __prepare(self):
+        self.__fetch_types()
+        self.__fetch_prev_experiments()
+        self.__fetch_trials()
 
-    def fetch_types(self):
+    def __fetch_types(self):
         type_docs = experiment_type_ref.stream()
         types = [t.to_dict() for t in type_docs]
         self.types = types
 
-    def fetch_prev_experiments(self):
+    def __fetch_prev_experiments(self):
         prev_experiment_docs = experiment_ref.order_by(
             u'createdAt', direction=firestore.Query.DESCENDING).stream()
         prev_experiments = [exp.to_dict() for exp in prev_experiment_docs]
@@ -95,7 +96,7 @@ class Experiment:
             self.starts_from_trial_index = 0
             self.ends_at_trial_index = 10
 
-    def fetch_trials(self):
+    def __fetch_trials(self):
         print(self.starts_from_trial_index, self.ends_at_trial_index)
         trials = pd.read_csv('https://firebasestorage.googleapis.com/v0/b/thelettersproject.appspot.com/o/all_trials.csv?alt=media&token=91d42c7c-5d8f-4f1a-ae89-59acd0bc6ff9')
         if (trials.shape[0]-1 <= self.ends_at_trial_index and self.starts_from_trial_index < trials.shape[0]-1):
@@ -105,7 +106,7 @@ class Experiment:
         if (trials.shape[0]-1 <= self.ends_at_trial_index and self.starts_from_trial_index >= trials.shape[0]-1):
             # Out of bound
             # check if there are any unfinished experiments; if so, return that experiment instead
-            undone_experiments = self.check_inprogress()
+            undone_experiments = self.__check_inprogress()
             if (undone_experiments):
                 exp = undone_experiments[0]
                 exp_id = exp["experimentID"]
@@ -122,7 +123,7 @@ class Experiment:
         self.trials = selected_trials.to_dict('records')
 
     def create_experiment(self):
-        self.prepare()
+        self.__prepare()
         new_experiment_data = {
             u'createdAt': datetime.datetime.now(),
             u'age': self.age,
@@ -134,17 +135,17 @@ class Experiment:
         doc_ref = experiment_ref.document()
         doc_ref.set(new_experiment_data)
         self.experiment_doc_ref = doc_ref
-        self.add_trials_to_db()
-        self.add_to_inprogress(doc_ref.id)
+        self.__add_trials_to_db()
+        self.__add_to_inprogress(doc_ref.id)
 
-    def add_trials_to_db(self):
+    def __add_trials_to_db(self):
         if (self.experiment_doc_ref == None):
             abort(500, "Something went wrong while trying to add trials")
         for t in self.trials:
             trial_ref = self.experiment_doc_ref.collection("trials").document()
             trial_ref.set({"options": t})
 
-    def add_to_inprogress(self, experiment_id):
+    def __add_to_inprogress(self, experiment_id):
         ref = db.collection("inprogress").document(experiment_id)
         ref.set({"experimentID": experiment_id,
                  "createdAt": datetime.datetime.now()})
@@ -158,7 +159,7 @@ class Experiment:
             self.experiment_doc_ref.set({u'completed': True}, merge=True)
             self.completed = True
 
-    def check_inprogress(self):
+    def __check_inprogress(self):
         docs = db.collection("inprogress").order_by(
             u'createdAt', direction=firestore.Query.DESCENDING).stream()
         inp = [d.to_dict() for d in docs]
