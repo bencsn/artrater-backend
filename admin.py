@@ -4,7 +4,7 @@ from firebase_admin import credentials
 from firebase_admin import auth
 
 cred = credentials.Certificate(
-    "rainbow/thelettersproject-firebase-adminsdk-jgkj4-b577df0515.json")
+    "thelettersproject-firebase-adminsdk-jgkj4-b577df0515.json")
 firebase_admin.initialize_app(
     cred, {'databaseURL': 'https://thelettersproject.firebaseio.com', 'authDomain': 'thelettersproject-artrater.web.app'})
 
