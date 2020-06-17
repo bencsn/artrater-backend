@@ -1,8 +1,7 @@
 import os
 
 from flask import Flask, request, abort, jsonify
-from admin import experiment_ref, experiment_type_ref, db
-from firebase_admin import firestore
+from admin import experiment_ref, experiment_type_ref, db, firestore
 import subprocess
 import datetime
 import pandas as pd

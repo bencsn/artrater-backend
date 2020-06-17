@@ -11,3 +11,4 @@ firebase_admin.initialize_app(
 db = firestore.client()
 experiment_ref = db.collection(u'experiments')
 experiment_type_ref = db.collection(u'experiment_types')
+firestore = firestore
