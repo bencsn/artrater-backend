@@ -1,21 +1,23 @@
 import os
-
 from flask import Flask, request, abort, jsonify
 from admin import experiment_ref, experiment_type_ref, db, firestore
 import subprocess
 import datetime
 import pandas as pd
 from experiment import Experiment
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={
+     r"/api/*": {"origins": ["http://localhost:3000"]}})
 
 
-@app.route('/')
+@app.route('/api')
 def hello_world():
     return 'This is an entry point to backend services for the Letter Project\'s platform for rating van Gogh\'s artworks'
 
 
-@app.route("/start")
+@app.route("/api/start", methods=["POST"])
 def start_experiment():
     """ 
     This will 
@@ -23,18 +25,20 @@ def start_experiment():
     - write trials to the 'trials' subcollection
     - return experimentID.
     """
+    post_data = request.get_json()
+    prolificID = post_data["prolificID"]
     e = Experiment()
-    e.create_experiment()
-    return jsonify({"experimentID": e.get_experiment_id(), "trials": e.get_full_trials(),  "info":e.get_experiment_info()})
+    e.create_experiment(prolificID=prolificID)
+    return jsonify({"experimentID": e.get_experiment_id(), "trials": e.get_trials(),  "info":e.get_experiment_info()})
 
-@app.route("/experiment")
+@app.route("/api/experiment")
 def get_experiment_by_id():
     eid = request.args.get('eid')
     if (not eid):
         abort(422, "Missing experiment ID (eid)")
     e = Experiment()
     e.set_existing_experiment_from_id(eid)
-    return jsonify({"experimentID":e.get_experiment_id(),"info":e.get_experiment_info(),"trials":e.get_full_trials()})
+    return jsonify({"experimentID":e.get_experiment_id(),"info":e.get_experiment_info(),"trials":e.get_trials()})
 
 
 if __name__ == "__main__":

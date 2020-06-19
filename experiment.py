@@ -51,8 +51,35 @@ class Experiment:
             experiment = None
         return experiment
 
+    def create_experiment(self, prolificID=None):
+        self.__prepare()
+        new_experiment_data = {
+            u'createdAt': datetime.datetime.now(),
+            u'age': self.age,
+            u'gender': self.gender,
+            u'starts_from_trial_index': self.starts_from_trial_index,
+            u'ends_at_trial_index': self.ends_at_trial_index,
+            u'completed': self.completed,
+            u'prolificID':prolificID
+        }
+        doc_ref = experiment_ref.document()
+        doc_ref.set(new_experiment_data)
+        self.experiment_doc_ref = doc_ref
+        self.__add_trials_to_db()
+        self.__add_to_inprogress(doc_ref.id)
+    
+    def get_trials(self):
+        all_trial_docs = self.experiment_doc_ref.collection("trials").get()
+        all_trials = []
+        for d in all_trial_docs:
+            tmp = d.to_dict()
+            tmp["id"] = d.id
+            all_trials.append(tmp)
+        return all_trials
+        
 
-    def get_full_trials(self):
+
+    def __get_full_trials(self):
         if (not self.trials or len(self.trials) <= 0 or len(self.types) <= 0 or not self.types):
             abort(422, "Missing trials or types")
         full_trials = []
@@ -122,28 +149,14 @@ class Experiment:
         selected_trials = trials[self.starts_from_trial_index:self.ends_at_trial_index]
         self.trials = selected_trials.to_dict('records')
 
-    def create_experiment(self):
-        self.__prepare()
-        new_experiment_data = {
-            u'createdAt': datetime.datetime.now(),
-            u'age': self.age,
-            u'gender': self.gender,
-            u'starts_from_trial_index': self.starts_from_trial_index,
-            u'ends_at_trial_index': self.ends_at_trial_index,
-            u'completed': self.completed
-        }
-        doc_ref = experiment_ref.document()
-        doc_ref.set(new_experiment_data)
-        self.experiment_doc_ref = doc_ref
-        self.__add_trials_to_db()
-        self.__add_to_inprogress(doc_ref.id)
+   
 
     def __add_trials_to_db(self):
         if (self.experiment_doc_ref == None):
             abort(500, "Something went wrong while trying to add trials")
-        for t in self.trials:
+        for t in self.__get_full_trials():
             trial_ref = self.experiment_doc_ref.collection("trials").document()
-            trial_ref.set({"options": t})
+            trial_ref.set(t)
 
     def __add_to_inprogress(self, experiment_id):
         ref = db.collection("inprogress").document(experiment_id)
