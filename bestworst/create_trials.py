@@ -25,6 +25,7 @@ For published academic research using these tools, please cite:
 """
 import sys, argparse, trialgen
 from spreadsheet import Spreadsheet
+import pandas as pd
 
 
 
@@ -64,7 +65,7 @@ def main(argv=sys.argv[1:]):
     K = args.K
     N = args.N
     if N == None:
-        N = len(items) * 8
+        N = len(items) * 3
         
     # generate trials from items
     trials = [ ]
@@ -82,9 +83,12 @@ def main(argv=sys.argv[1:]):
     # print the output, complete with header.
     # header = [ "option%d" % (i+1) for i in range(K) ]
     # print(",".join(header))
-    for trial in trials:
-        print(",".join(trial))
+    # for trial in trials:
+    #     print(",".join(trial))
     # return trials
+    df = pd.DataFrame(trials)
+    df.to_csv("all_trials_reduced.csv")
+    
         
 if __name__ == "__main__":
     sys.exit(main())

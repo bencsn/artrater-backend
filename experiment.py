@@ -6,7 +6,7 @@ import datetime
 
 
 class Experiment:
-    def __init__(self,  experiment_doc_ref=None, age="Not specified", gender="Not specified", completed=False, types=[], prev_experiments=[], starts_from_trial_index=0, ends_at_trial_index=10, trials=[]):
+    def __init__(self,  experiment_doc_ref=None, age="Not specified", gender="Not specified", completed=False, types=[], prev_experiments=[], starts_from_trial_index=0, ends_at_trial_index=20, trials=[]):
         self.age = age
         self.gender = gender
         self.types = types
@@ -117,15 +117,15 @@ class Experiment:
         if (len(prev_experiments) > 0):
             last_experiment = prev_experiments[-len(prev_experiments)]
             self.starts_from_trial_index = last_experiment['ends_at_trial_index']
-            self.ends_at_trial_index = self.starts_from_trial_index + 10
+            self.ends_at_trial_index = self.starts_from_trial_index + 20
         else:
             last_experiment = None
             self.starts_from_trial_index = 0
-            self.ends_at_trial_index = 10
+            self.ends_at_trial_index = 20
 
     def __fetch_trials(self):
         print(self.starts_from_trial_index, self.ends_at_trial_index)
-        trials = pd.read_csv('https://firebasestorage.googleapis.com/v0/b/thelettersproject.appspot.com/o/all_trials.csv?alt=media&token=91d42c7c-5d8f-4f1a-ae89-59acd0bc6ff9')
+        trials = pd.read_csv('https://firebasestorage.googleapis.com/v0/b/thelettersproject.appspot.com/o/all_trials_reduced.csv?alt=media&token=211746e2-b85c-433c-a18e-6508b257760d')
         if (trials.shape[0]-1 <= self.ends_at_trial_index and self.starts_from_trial_index < trials.shape[0]-1):
             # Last batch
             # Return the remaining trials
